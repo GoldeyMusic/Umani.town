@@ -1,3 +1,11 @@
+# UMANI Town — campus WorkAdventure (NEODIS)
+
+Map du campus de formation UMANI Town (https://map.umani.town/@/campus), maintenue par NEODIS.
+
+Design et développement initial de la map : KomponentAB (https://github.com/KomponentAB/Coolio.Town), sous licence CC BY-SA 3.0 (voir LICENSE.map). Ce dépôt est un fork qui en poursuit le développement.
+
+---
+
 # WorkAdventure Map Starter Kit
 
 ![office map thumbnail](./office.png)
