@@ -1915,12 +1915,12 @@
         {
          "name":"mapCopyright",
          "type":"string",
-         "value":"Komponent.Works"
+         "value":"Map design : Komponent.Works (CC BY-SA 3.0) \u00b7 maintenue par NEODIS"
         }, 
         {
          "name":"mapDescription",
          "type":"string",
-         "value":"A perfect virtual village for your Community."
+         "value":"Campus de formation UMANI Town (NEODIS)"
         }, 
         {
          "name":"mapImage",
@@ -1930,7 +1930,7 @@
         {
          "name":"mapName",
          "type":"string",
-         "value":"CoolioTown"
+         "value":"UMANI Town"
         }, 
         {
          "name":"script",
