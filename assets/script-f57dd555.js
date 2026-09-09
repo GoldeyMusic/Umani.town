@@ -1,0 +1,2 @@
+WA.onInit().then(()=>{["lowerLeft","lowerRight","upperLeft","upperRight"].forEach(o=>{WA.room.area.onEnter(`roof_${o}`).subscribe(()=>WA.room.hideLayer(`roofs/${o}`)),WA.room.area.onLeave(`roof_${o}`).subscribe(()=>WA.room.showLayer(`roofs/${o}`))});const r=[["admin",[128,0,128]],["teacher",[0,0,255]],["masterclass",[255,255,0]]].find(([o])=>WA.player.tags.includes(o));r&&WA.player.setOutlineColor(...r[1])});
+//# sourceMappingURL=script-f57dd555.js.map
