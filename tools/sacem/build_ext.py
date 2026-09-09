@@ -5,7 +5,7 @@ du campus (60 x 93), + les entrées du builder tmj (paint-sacem/).
 
 Tout est cloné du campus : herbe, sable, sable immergé, rochers de l'anneau du plateau, arbres,
 palmiers, buissons, fleurs, rochers ; l'eau est décrite par un masque de tuiles -> water.json (autotile
-du tileset coolio_animated_water). Le bâtiment SACEM (calques Photoshop de David à l'échelle 0,83)
+du tileset coolio_animated_water). Le bâtiment SACEM (calques Photoshop de David à l'échelle 0,72)
 va dans walls (base) et roof (toit).
 
 Sorties : tilesets/sacem-test/coolio_*.png, general shadow.png, God ray linear 45 tall.png
@@ -320,12 +320,12 @@ print("décor :", len(PROPS), "objets")
 # =====================================================================================
 # 8. Bâtiment SACEM : base -> walls, toit -> roof, collisions enveloppe, porte
 # =====================================================================================
-PX, PY = 66 * T, 26 * T
+PX, PY = 68 * T, 31 * T                     # porte colonne 84 (16 + 68) ; bas du parvis ligne 62,8 comme à 0,83
 base = load_rgba(os.path.join(SACEM, "ps_base.png")); roof = load_rgba(os.path.join(SACEM, "ps_toit.png"))
 alpha_over(C["walls"], base, PX, PY); alpha_over(C["roof"], roof, PX, PY)
 Wt, Ht = base.shape[1] // T, base.shape[0] // T
 Bf = base.astype(int); ext = np.asarray(Image.alpha_composite(Image.fromarray(base), Image.fromarray(roof))).astype(int)
-S_, OFF = 0.83, (8, 0)
+S_, OFF = 0.72, (21, 0)
 sample = Bf[int(1000*S_)+OFF[1]:int(1040*S_)+OFF[1], int(560*S_)+OFF[0]:int(620*S_)+OFF[0], :3].reshape(-1, 3)
 floor_c = np.median(sample, axis=0); dist_f = np.abs(Bf[..., :3] - floor_c).sum(axis=2)
 floorm = (dist_f < 40) & (Bf[..., 3] > 127)
@@ -335,23 +335,39 @@ cx0, cy0 = int(780*S_)+OFF[0], int(730*S_)+OFF[1]
 lab, n = ndi.label(rug); keep = set(np.unique(lab[cy0-60:cy0+60, cx0-120:cx0+120])) - {0}; rug = np.isin(lab, list(keep))
 mat = (Bf[..., 3] > 127) & (r_ < 110) & (g_ < 110) & (b_ < 130) & (abs(r_ - g_) < 15)
 lab, n = ndi.label(mat); yy_, xx_ = int(1280*S_)+OFF[1], int(704*S_)+OFF[0]; mat = (lab == lab[yy_, xx_]) if lab[yy_, xx_] else np.zeros_like(mat)
-# Règle (demande de David) : on marche partout dans l'open space, meubles compris ; seuls les murs bloquent ;
-# derrière le bâtiment, seule l'emprise de la BASE bloque (pas celle du toit) -> on peut passer juste derrière le mur.
+# Règle (demande de David) : on marche sur le SOL du hall (open space libre) ; tout le reste du bâtiment bloque :
+# murs, faces intérieures des murs (sinon on « grimpe » sur le mur du fond), bibliothèques, présentoir.
+# Derrière le bâtiment, seule l'emprise de la BASE bloque (pas celle du toit) -> on peut passer juste derrière le mur.
 opaque = Bf[..., 3] > 127
+rf_ = np.maximum(r_, 1)
+floorc = opaque & (r_ > 196) & (np.abs(g_ / rf_ - 0.87) < 0.05) & (b_ / rf_ < 0.765) & (b_ / rf_ > 0.66)   # beige du sol (r >= 203 partout) ; les faces des murs sont plus sombres (r ~ 170) ou plus grises (b/r ~ 0,79)
 wall = opaque & (((r_ > 175) & (g_ > 175) & (b_ > 175) & (np.abs(r_ - b_) < 40))            # murs blancs / gris clair
                  | ((b_ > r_ + 30) & (b_ > 60) & (r_ < 90)))                                  # bandeaux bleu marine
 wall = ndi.binary_closing(wall, iterations=2)
-hall_seed = (int(730 * S_) + OFF[1], int(780 * S_) + OFF[0])                                  # centre du tapis
-lab, n = ndi.label(opaque & ~wall); hall_px = lab == lab[hall_seed]
+hall_seed = (int(730 * S_) + OFF[1], int(780 * S_) + OFF[0])                                  # centre du hall
+lab, n = ndi.label(ndi.binary_closing(floorc, iterations=2)); hall_px = lab == lab[hall_seed]
 apron_seed = (int(1300 * S_) + OFF[1], int(704 * S_) + OFF[0])                                # paillasson / parvis
-apron_px = (lab == lab[apron_seed]) if lab[apron_seed] else np.zeros_like(hall_px)
-hall_px = ndi.binary_fill_holes(hall_px | apron_px)
+lab, n = ndi.label(opaque & ~wall); apron_px = ((lab == lab[apron_seed]) if lab[apron_seed] else np.zeros_like(hall_px)) & ~hall_px
+# Présentoir (tableau SACEM) : franchissable (demande de David) -> compté comme sol ; la face du mur derrière reste bloquée
+pb = (slice(int(630 * S_) + OFF[1], int(785 * S_) + OFF[1]), slice(int(415 * S_) + OFF[0], int(510 * S_) + OFF[0]))
+wallface = (np.abs(g_ / rf_ - 0.887) < 0.04) & (b_ / rf_ > 0.76) & (b_ / rf_ < 0.83)
+pres = np.zeros_like(hall_px); pres[pb] = opaque[pb] & ~hall_px[pb] & ~wallface[pb]
+hall_px = hall_px | pres
 walk_t = np.zeros((Ht, Wt), bool); opq_t = np.zeros((Ht, Wt), bool)
 for ty in range(Ht):
     for tx in range(Wt):
         walk_t[ty, tx] = hall_px[ty*T:(ty+1)*T, tx*T:(tx+1)*T].mean() >= 0.5 or apron_px[ty*T:(ty+1)*T, tx*T:(tx+1)*T].mean() >= 0.1
         opq_t[ty, tx] = opaque[ty*T:(ty+1)*T, tx*T:(tx+1)*T].mean() >= 0.15
 block = opq_t & ~walk_t
+# Bibliothèques (bois) contre le mur du fond : bloquées elles aussi (seuls meubles conservés par David dans le hall vide)
+wood = opaque & (r_ > 100) & (r_ > g_ + 25) & (g_ > b_ + 10) & (b_ < 110) & (r_ < 230)
+lab, n = ndi.label(wood); sizes = ndi.sum(wood, lab, range(1, n + 1))
+shelf = ndi.binary_fill_holes(ndi.binary_closing(np.isin(lab, [i + 1 for i, s_ in enumerate(sizes) if s_ >= 2500]), iterations=3))
+n_shelf = 0
+for ty in range(Ht):
+    for tx in range(Wt):
+        if shelf[ty*T:(ty+1)*T, tx*T:(tx+1)*T].mean() >= 0.25 and not block[ty, tx]: block[ty, tx] = True; n_shelf += 1
+print("bibliothèques :", n_shelf, "tuiles bloquées")
 door_col = (int(704*S_)+OFF[0]) // T; door_rows = range((int(1000*S_)+OFF[1]) // T, Ht)   # de l'auvent au bas du parvis
 for ty in door_rows:
     for tx in (door_col - 1, door_col, door_col + 1): block[ty, tx] = False

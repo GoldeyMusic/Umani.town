@@ -14,7 +14,7 @@ tilesets dans `tilesets/sacem-test/` et son propre script `sacem-test.js`.
 | `paint-sacem/` | entrées du builder : `water.json` (eau animée), `collisions.png` (zone d'extension), `clears.json` (tuiles vidées dans le campus : arbre, foyers), `areas.json` (aire `roof_sacem`), `ring.json` / `props.json` (rochers et décor clonés, positions en tuiles) |
 | `tools/build_map.py` | génère un .tmj à partir de `map.tmj` + peintures étendues (gère l'extension en largeur) |
 | `tools/sacem/build_ext.py` | construit les peintures étendues (herbe/sable/mer/rochers/décor clonés du campus, chemin, bâtiment) |
-| `tools/sacem/assets/ps_base.png`, `ps_toit.png` | calques Photoshop de David (intérieur = base, toit) à l'échelle map (0,83) |
+| `tools/sacem/assets/ps_base.png`, `ps_toit.png` | calques Photoshop de David (hall vide = base, toit) à l'échelle map (0,72, décalage 21 px pour caler la porte sur une tuile) |
 
 ## Régénérer
 
@@ -40,7 +40,7 @@ peintures étendues (ou garder le dossier `tilesets/sacem-test/` comme tilesets 
 ## Ajuster
 
 - Collisions du bâtiment : ouvrir `sacem-test.tmj` dans Tiled, calque `collisions` (tuile « collides »).
-  Le bâtiment a 293 tuiles bloquées : uniquement les murs (open space et meubles libres) ; seule l'emprise de la base bloque derrière, on passe juste derrière le mur (caché par le toit).
+  Le bâtiment a 336 tuiles bloquées : tout ce qui n'est pas le sol du hall (murs et leurs faces intérieures, bibliothèques, plantes de l'entrée ; le présentoir est franchissable) ; l'open space, l'entrée et le parvis sont libres ; seule l'emprise de la base bloque derrière, on passe juste derrière le mur (caché par le toit).
 - Décor : `paint-sacem/props.json` = liste `[objet, colonne, ligne]` (objets : `arbre`, `arbre2`, `palmA`,
   `palmC`, `palmD`, `palmE`, `buisson`, `fleur`, `palmbush`, `rocher`), puis régénérer.
-- Position du bâtiment : `PX, PY` dans `build_ext.py` (actuellement colonne 66, ligne 26 ; porte colonne 84).
+- Position du bâtiment : `PX, PY` dans `build_ext.py` (actuellement colonne 68, ligne 31 ; porte colonne 84, bas du parvis ligne 62,8). Échelle `S_`/`OFF` (0,72 / 21 px) : à changer avec les calques `assets/`.
