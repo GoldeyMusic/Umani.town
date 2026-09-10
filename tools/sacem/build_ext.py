@@ -387,8 +387,11 @@ print("bâtiment : collisions", int(block.sum()), "tuiles ; porte colonne", (PX 
 ground = hall_px | apron_px
 dist, (iy_, ix_) = ndi.distance_transform_edt(~hall_px, return_indices=True)     # référence : le sol du hall seulement
 yy_b = np.arange(Ht * T)[:, None]                                                  # (le parvis, au même niveau que le mur avant, fausserait le test)
-cy_floor = float(np.where(hall_px)[0].mean())                                    # ligne médiane du sol : au-dessous, les murs latéraux sont devant
-front = opaque & ~ground & (dist < 400) & ((iy_ < yy_b - 2) | (yy_b > cy_floor - 20))
+# Tout le bâtiment passe devant le woka (il ne peut chevaucher que ce que ses collisions l'autorisent à approcher : bande
+# basse des murs avant/latéraux, face intérieure du mur du fond depuis l'extérieur), SAUF la bande de 40 px des éléments
+# posés juste au-dessus du sol (pied du mur du fond, bas des bibliothèques) : là, un woka sur le sol est devant eux.
+near_floor_below = (iy_ > yy_b) & (dist <= 40)
+front = opaque & ~ground & (dist < 400) & ~near_floor_below
 front = ndi.binary_opening(front, iterations=1)                         # sans miettes isolées
 fb = base.copy(); fb[~front] = 0                                        # pixels « devant »
 wb = base.copy(); wb[front] = 0                                         # pixels « derrière » + sol
