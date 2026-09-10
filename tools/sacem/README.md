@@ -53,8 +53,8 @@ peintures étendues (ou garder le dossier `tilesets/sacem-test/` comme tilesets 
 
 Générée par `tools/sacem/build_entities.py` à partir des détourages de David (`~/Downloads/Objets séparés`, échelle master 1500 px) :
 `python3 tools/sacem/build_entities.py` (options : dossier des exports, dossier de sortie, planche de contrôle).
-Règles : réduction 0,72 × 0,65 = 0,47 (LANCZOS ; le mobilier du PSD est à l'échelle de l'architecture, 65 % validé par David face aux wokas), objet calé en bas de son canevas, position horizontale choisie pour bloquer le moins de tuiles ;
-collision = bande de base (20 px au-dessus des pieds), uniquement pour cloison, accueil, bureau, plantes, machine à café ;
-canapé, fauteuils, table basse et tapis sont franchissables ; le tapis est sous les wokas (`depthOffset` négatif).
+Règles : chaque objet est rééchantillonné depuis l'export master (LANCZOS) à 0,72 × 0,65 = 0,47 (le mobilier du PSD est à l'échelle de l'architecture, 65 % validé par David face aux wokas), sauf échelles propres `SCALE` (Point info 0,75 ; « Tapis rond (grand) » 0,85, doublon du tapis) ; objet calé en bas de son canevas, position horizontale choisie pour bloquer le moins de tuiles ;
+collision = bande de base (20 px au-dessus des pieds : accueil, bureau), socle (plantes, machine à café, table basse) ou polyligne `LINE` mesurée sur l'export (cloison vitrée : chevron, la base du panneau haut est cachée par le panneau bas) ; les grilles sont rendues 4-connexes (pas de passage en diagonale) ;
+canapé, fauteuils et tapis sont franchissables ; le tapis est sous les wokas, les sièges sous le woka qui s'y tient, la cloison est toujours dessinée devant (`depthOffset`).
 Déclaration dans la room (token map-storage) :
 `curl -X PATCH "https://coolio-town-14561.map-storage.workadventu.re/sacem-test.wam" -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json-patch+json" -d '[{"op":"add","path":"/entityCollections/-","value":{"url":"https://goldeymusic.github.io/Umani.town/entities/sacem/sacem.json","type":"file"}}]'`

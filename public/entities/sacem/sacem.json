@@ -32,21 +32,14 @@
     [
      0,
      0,
-     0,
+     1,
      1,
      0
     ],
     [
      0,
-     0,
-     0,
-     0,
-     0
-    ],
-    [
      1,
-     0,
-     0,
+     1,
      0,
      0
     ],
@@ -58,14 +51,20 @@
      0
     ],
     [
+     1,
+     1,
      0,
      0,
+     0
+    ],
+    [
+     0,
+     1,
      1,
      0,
      0
     ]
-   ],
-   "depthOffset": -71
+   ]
   },
   {
    "name": "Table basse",
@@ -76,7 +75,14 @@
    "imagePath": "table-basse-down.png",
    "direction": "Down",
    "color": "brown",
-   "depthOffset": -64
+   "collisionGrid": [
+    [
+     0
+    ],
+    [
+     1
+    ]
+   ]
   },
   {
    "name": "Point info (accueil)",
@@ -92,17 +98,20 @@
     [
      0,
      0,
+     0,
      0
     ],
     [
      1,
+     0,
      0,
      0
     ],
     [
      1,
      1,
-     1
+     1,
+     0
     ]
    ]
   },
@@ -116,6 +125,17 @@
    "direction": "Down",
    "color": "brown",
    "depthOffset": -160
+  },
+  {
+   "name": "Tapis rond (grand)",
+   "tags": [
+    "sacem",
+    "tapis"
+   ],
+   "imagePath": "tapis-rond-grand-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "depthOffset": -192
   },
   {
    "name": "Bureau",
@@ -138,9 +158,9 @@
      0
     ],
     [
-     0,
      1,
-     1
+     1,
+     0
     ]
    ]
   },
