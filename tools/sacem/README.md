@@ -21,8 +21,10 @@ tilesets dans `tilesets/sacem-test/` et son propre script `sacem-test.js`.
 
 ```
 python3 tools/sacem/build_ext.py
-python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)"
+python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)" --keep-collisions sacem-test.tmj
 ```
+
+`--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées.
 
 Dépendances Python : Pillow, numpy, scipy.
 
@@ -40,7 +42,8 @@ peintures étendues (ou garder le dossier `tilesets/sacem-test/` comme tilesets 
 
 ## Ajuster
 
-- Collisions du bâtiment : ouvrir `sacem-test.tmj` dans Tiled, calque `collisions` (tuile « collides »).
+- Collisions du bâtiment : ouvrir `sacem-test.tmj` dans Tiled, calque `collisions` (tuile BLOCK de WA_Special_Zones), Cmd+S, push. Ne pas laisser d'autres calques masqués ou à opacité réduite : ces réglages sont enregistrés et appliqués en jeu (l'opacité du calque `collisions` seule est sans effet, le build efface ces tuiles).
+- Profondeur : les pixels du bâtiment situés devant le sol du hall à l'écran (mur avant, moitié basse des murs latéraux, encadrement de la porte) sont envoyés dans la peinture `above` (dessinée par-dessus le woka) par `build_ext.py` ; le mur du fond et les bibliothèques restent dans `walls`. Le woka est donc masqué quand il longe le bas de la pièce.
   Le bâtiment a 347 tuiles bloquées : tout ce qui n'est pas le sol du hall (murs et leurs faces intérieures, bibliothèques, plantes de l'entrée ; le présentoir est franchissable) ; l'open space, l'entrée et le parvis sont libres ; seule l'emprise de la base bloque derrière, on passe juste derrière le mur (caché par le toit).
 - Décor : `paint-sacem/props.json` = liste `[objet, colonne, ligne]` (objets : `arbre`, `arbre2`, `palmA`,
   `palmC`, `palmD`, `palmE`, `buisson`, `fleur`, `palmbush`, `rocher`), puis régénérer.

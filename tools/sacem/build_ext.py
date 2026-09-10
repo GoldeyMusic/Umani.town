@@ -380,6 +380,21 @@ for ty in range(Ht):
     for tx in range(Wt):
         if block[ty, tx]: coll_px[PY + ty*T:PY + (ty+1)*T, PX + tx*T:PX + (tx+1)*T] = 255
 print("bâtiment : collisions", int(block.sum()), "tuiles ; porte colonne", (PX // T) + door_col)
+# Profondeur (demande de David, 10/09) : les parties du bâtiment situées DEVANT le sol à l'écran (mur avant, moitié basse des
+# murs latéraux, encadrement de la porte) passent dans la peinture `above` (dessinée par-dessus le woka) ; celles situées
+# derrière (mur du fond, bibliothèques) restent dans `walls`. Règle : pour chaque pixel opaque hors sol, le pixel de sol
+# le plus proche est-il au-dessus (=> devant) ou au-dessous (=> derrière) ?
+ground = hall_px | apron_px
+dist, (iy_, ix_) = ndi.distance_transform_edt(~hall_px, return_indices=True)     # référence : le sol du hall seulement
+yy_b = np.arange(Ht * T)[:, None]                                                  # (le parvis, au même niveau que le mur avant, fausserait le test)
+cy_floor = float(np.where(hall_px)[0].mean())                                    # ligne médiane du sol : au-dessous, les murs latéraux sont devant
+front = opaque & ~ground & (dist < 400) & ((iy_ < yy_b - 2) | (yy_b > cy_floor - 20))
+front = ndi.binary_opening(front, iterations=1)                         # sans miettes isolées
+fb = base.copy(); fb[~front] = 0                                        # pixels « devant »
+wb = base.copy(); wb[front] = 0                                         # pixels « derrière » + sol
+C["walls"][PY:PY + Ht * T, PX:PX + Wt * T] = 0
+alpha_over(C["walls"], wb, PX, PY); alpha_over(C["above"], fb, PX, PY)
+print("profondeur : ", int(front.sum()), "px de murs avant passés dans above")
 # aire roof_sacem = cadre du bâtiment (base)
 ys, xs = np.where(base[..., 3] > 0)
 areas = [{"name": "roof_sacem", "x": PX + int(xs.min()), "y": PY + int(ys.min()), "width": int(xs.max() - xs.min() + 1), "height": int(ys.max() - ys.min() + 1)}]

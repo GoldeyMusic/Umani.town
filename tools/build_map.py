@@ -50,6 +50,8 @@ def main():
     ap.add_argument("--src", default="map.tmj"); ap.add_argument("--paintings", required=True)
     ap.add_argument("--paint", default=None); ap.add_argument("--out", required=True)
     ap.add_argument("--script", default=None); ap.add_argument("--name", default=None)
+    ap.add_argument("--keep-collisions", default=None, metavar="TMJ",
+                    help="reprend tel quel le calque collisions de ce .tmj (retouches faites dans Tiled) au lieu de le recalculer")
     a = ap.parse_args()
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); os.chdir(root)
     m = json.load(open(a.src, encoding="utf-8"))
@@ -144,6 +146,13 @@ def main():
                         data[i] = 0                                             # tuile de peinture vidée (ex. arbre retiré)
         elif l["name"] in ROOF_LAYERS:
             pass
+        elif l["name"] == "collisions" and a.keep_collisions:
+            k = json.load(open(a.keep_collisions, encoding="utf-8"))
+            kl = [x for x in k["layers"] if x.get("name") == "collisions"][0]
+            if (k["width"], k["height"]) != (W, H): sys.exit(f"--keep-collisions : taille {k['width']}x{k['height']} != {W}x{H}")
+            l["data"] = [COLLIDE_GID if g else 0 for g in kl["data"]]
+            print("collisions reprises de", a.keep_collisions, ":", sum(1 for g in l["data"] if g), "tuiles")
+            continue
         elif l["name"] == "collisions":
             if coll_mask is not None:
                 for i in range(W * H):
