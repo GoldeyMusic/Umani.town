@@ -400,11 +400,18 @@ cand = opaque & ~ground & (dist < 400)
 f_px = cand & (((dy_ < 0) & (-dy_ >= dx_)) | ((dy_ > 0) & (dy_ >= dx_) & (dist > 40)))
 b_px = cand & ~f_px
 front = np.zeros_like(cand)
+# Murs latéraux (sol à côté) : on ne peut pas être « derrière » un mur qui est à côté de soi -> ces tuiles restent
+# infranchissables quoi qu'en dise le calque collisions (liste écrite dans paint-sacem/walls-side.json, appliquée par build_map)
+side_px = cand & (dx_ > np.abs(dy_))
+walls_side = []
 for ty_ in range(Ht):
     for tx_ in range(Wt):
         sl = (slice(ty_ * T, (ty_ + 1) * T), slice(tx_ * T, (tx_ + 1) * T))
         nf, nb = int(f_px[sl].sum()), int(b_px[sl].sum())
         if nf + nb and nf >= nb: front[sl] = cand[sl]
+        if side_px[sl].sum() >= 0.3 * T * T and hall_px[sl].mean() < 0.5 and not (door_col - 1 <= tx_ <= door_col + 1 and ty_ >= door_rows[0]):
+            walls_side.append([PX // T + tx_, PY // T + ty_])          # (le couloir de la porte reste libre sur 3 tuiles)
+print("murs latéraux infranchissables :", len(walls_side), "tuiles")
 front = ndi.binary_opening(front, iterations=1)                         # sans miettes isolées
 fb = base.copy(); fb[~front] = 0                                        # pixels « devant »
 wb = base.copy(); wb[front] = 0                                         # pixels « derrière » + sol
@@ -470,4 +477,5 @@ save_rgba(coll_img, os.path.join(PAINT, "collisions.png"))
 json.dump(wj, open(os.path.join(PAINT, "water.json"), "w"))
 json.dump(clears, open(os.path.join(PAINT, "clears.json"), "w"))
 json.dump(areas, open(os.path.join(PAINT, "areas.json"), "w"))
+json.dump(walls_side, open(os.path.join(PAINT, "walls-side.json"), "w"))
 print("peintures écrites dans", OUT_TS)

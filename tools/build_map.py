@@ -151,7 +151,9 @@ def main():
             kl = [x for x in k["layers"] if x.get("name") == "collisions"][0]
             if (k["width"], k["height"]) != (W, H): sys.exit(f"--keep-collisions : taille {k['width']}x{k['height']} != {W}x{H}")
             l["data"] = [COLLIDE_GID if g else 0 for g in kl["data"]]
-            print("collisions reprises de", a.keep_collisions, ":", sum(1 for g in l["data"] if g), "tuiles")
+            side = load_json("walls-side.json") or []                      # murs latéraux du bâtiment : toujours bloqués
+            for x, y in side: l["data"][y * W + x] = COLLIDE_GID
+            print("collisions reprises de", a.keep_collisions, ":", sum(1 for g in l["data"] if g), "tuiles (dont", len(side), "de murs latéraux imposées)")
             continue
         elif l["name"] == "collisions":
             if coll_mask is not None:

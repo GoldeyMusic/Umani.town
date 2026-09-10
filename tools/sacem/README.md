@@ -24,7 +24,7 @@ python3 tools/sacem/build_ext.py
 python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)" --keep-collisions sacem-test.tmj
 ```
 
-`--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées.
+`--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées. Dans les deux cas, les tuiles de `paint-sacem/walls-side.json` (murs latéraux du bâtiment, calculées par `build_ext.py`) sont toujours bloquées : on ne peut pas être derrière un mur qui est à côté de soi, donc on ne le traverse pas ; le couloir de la porte (3 tuiles) est exempté.
 
 Dépendances Python : Pillow, numpy, scipy.
 
