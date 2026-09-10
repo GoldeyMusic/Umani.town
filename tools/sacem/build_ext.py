@@ -385,7 +385,7 @@ print("bâtiment : collisions", int(block.sum()), "tuiles ; porte colonne", (PX 
 # derrière (mur du fond, bibliothèques) restent dans `walls`. Règle : pour chaque pixel opaque hors sol, le pixel de sol
 # le plus proche est-il au-dessus (=> devant) ou au-dessous (=> derrière) ?
 ground = hall_px | apron_px
-dist, (iy_, ix_) = ndi.distance_transform_edt(~hall_px, return_indices=True)     # référence : le sol du hall seulement
+dist, (iy_, ix_) = ndi.distance_transform_edt(~(hall_px & ~pres), return_indices=True)     # référence : le sol du hall seulement (sans le présentoir)
 yy_b = np.arange(Ht * T)[:, None]                                                  # (le parvis, au même niveau que le mur avant, fausserait le test)
 # Tout le bâtiment passe devant le woka (il ne peut chevaucher que ce que ses collisions l'autorisent à approcher : bande
 # basse des murs avant/latéraux, face intérieure du mur du fond depuis l'extérieur), SAUF la bande de 40 px des éléments
@@ -402,15 +402,20 @@ b_px = cand & ~f_px
 front = np.zeros_like(cand)
 # Murs latéraux (sol à côté) : on ne peut pas être « derrière » un mur qui est à côté de soi -> ces tuiles restent
 # infranchissables quoi qu'en dise le calque collisions (liste écrite dans paint-sacem/walls-side.json, appliquée par build_map)
-side_px = cand & (dx_ > np.abs(dy_))
+side_px = cand & ((dx_ > np.abs(dy_)) | ((dy_ > 0) & (dy_ >= dx_) & (dist <= 40)))     # murs latéraux + pied des murs du fond (on ne marche pas dedans)
 walls_side = []
 for ty_ in range(Ht):
     for tx_ in range(Wt):
         sl = (slice(ty_ * T, (ty_ + 1) * T), slice(tx_ * T, (tx_ + 1) * T))
         nf, nb = int(f_px[sl].sum()), int(b_px[sl].sum())
         if nf + nb and nf >= nb: front[sl] = cand[sl]
-        if side_px[sl].sum() >= 0.3 * T * T and hall_px[sl].mean() < 0.5 and not (door_col - 1 <= tx_ <= door_col + 1 and ty_ >= door_rows[0]):
-            walls_side.append([PX // T + tx_, PY // T + ty_])          # (le couloir de la porte reste libre sur 3 tuiles)
+        in_door = door_col - 1 <= tx_ <= door_col + 1 and ty_ >= door_rows[0]
+        if (side_px[sl].sum() >= 0.25 * T * T and not in_door) or (in_door and tx_ != door_col and cand[sl].sum() >= 0.25 * T * T):
+            walls_side.append([PX // T + tx_, PY // T + ty_])          # couloir : l'axe reste libre, les faces des piliers bloquent
+for cx_ in (door_col - 1, door_col + 1):                                   # colonnes latérales du couloir : pas de niche entre deux tuiles bloquées
+    rows_b = [y for x, y in walls_side if x == PX // T + cx_ and y >= PY // T + door_rows[0]]
+    for y in range(min(rows_b), max(rows_b) + 1) if rows_b else []:
+        if [PX // T + cx_, y] not in walls_side: walls_side.append([PX // T + cx_, y])
 print("murs latéraux infranchissables :", len(walls_side), "tuiles")
 front = ndi.binary_opening(front, iterations=1)                         # sans miettes isolées
 fb = base.copy(); fb[~front] = 0                                        # pixels « devant »
@@ -418,9 +423,16 @@ wb = base.copy(); wb[front] = 0                                         # pixels
 C["walls"][PY:PY + Ht * T, PX:PX + Wt * T] = 0
 alpha_over(C["walls"], wb, PX, PY); alpha_over(C["above"], fb, PX, PY)
 print("profondeur : ", int(front.sum()), "px de murs avant passés dans above")
-# aire roof_sacem = cadre du bâtiment (base)
-ys, xs = np.where(base[..., 3] > 0)
-areas = [{"name": "roof_sacem", "x": PX + int(xs.min()), "y": PY + int(ys.min()), "width": int(xs.max() - xs.min() + 1), "height": int(ys.max() - ys.min() + 1)}]
+# aire roof_sacem = l'intérieur seulement (sol du hall, prolongé de 3 tuiles vers le bas pour la bande du mur avant et le
+# seuil de la porte) : le toit ne se découvre qu'en franchissant l'entrée, pas en approchant par l'extérieur (demande de David)
+ys, xs = np.where(hall_px & ~pres)
+ax0, ay0 = (xs.min() // T) * T, (ys.min() // T) * T
+ax1, ay1 = -(-(xs.max() + 1) // T) * T, min(Ht * T, -(-(ys.max() + 1) // T) * T + 3 * T)
+areas = [{"name": "roof_sacem", "x": PX + int(ax0), "y": PY + int(ay0), "width": int(ax1 - ax0), "height": int(ay1 - ay0),
+          "interior": {"seed": [PX // T + door_col, PY // T + Ht // 2], "outside": [PX // T - 4, PY // T + Ht // 2],
+                       "door": [[PX // T + door_col - 1, PY // T + door_rows[0]], [PX // T + door_col + 1, PY // T + Ht - 1]],
+                       "door_inside_to": PY // T + (ay1 // T) - 1}}]      # build_map découpe l'intérieur en rectangles (atteignables seulement par la porte)
+print("aire roof_sacem : colonnes", (PX + ax0) // T, "à", (PX + ax1) // T - 1, ", lignes", (PY + ay0) // T, "à", (PY + ay1) // T - 1)
 
 # =====================================================================================
 # 9. Eau : collisions sur toutes les tuiles d'eau de l'extension ; water.json (autotile) pour x >= 57

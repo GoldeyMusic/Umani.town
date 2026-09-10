@@ -1,1 +1,1 @@
-[{"name": "roof_sacem", "x": 2319, "y": 1103, "width": 836, "height": 910}]
+[{"name": "roof_sacem", "x": 2368, "y": 1312, "width": 768, "height": 640, "interior": {"seed": [84, 48], "outside": [64, 48], "door": [[83, 53], [85, 64]], "door_inside_to": 59}}]

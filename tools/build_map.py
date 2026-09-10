@@ -188,6 +188,42 @@ def main():
 
     # aires
     fl = next(l for l in m["layers"] if l["type"] == "objectgroup" and l["name"] == "floorLayer")
+    # aires "intérieur" : rectangles couvrant les tuiles atteignables depuis un point intérieur mais PAS depuis l'extérieur
+    # sans passer par la porte (le toit ne se découvre qu'en franchissant l'entrée)
+    coll_l = next(l for l in walk(m["layers"]) if l.get("name") == "collisions")
+    blocked = [bool(g) for g in coll_l["data"]]
+    def reach(start, forbid):
+        seen = [False] * (W * H); q = [start]; seen[start[1] * W + start[0]] = True
+        while q:
+            x, y = q.pop()
+            for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                nx, ny = x + dx, y + dy
+                if 0 <= nx < W and 0 <= ny < H and not seen[ny * W + nx] and not blocked[ny * W + nx] and not forbid(nx, ny):
+                    seen[ny * W + nx] = True; q.append((nx, ny))
+        return seen
+    expanded = []
+    for ar in areas:
+        if "interior" not in ar: expanded.append(ar); continue
+        it = ar["interior"]; (dx0, dy0), (dx1, dy1) = it["door"]
+        door = lambda x, y: dx0 <= x <= dx1 and dy0 <= y <= dy1
+        inside = reach(tuple(it["seed"]), door); outside = reach(tuple(it["outside"]), door)
+        bx0, by0 = ar["x"] // TILE, ar["y"] // TILE; bx1, by1 = (ar["x"] + ar["width"]) // TILE - 1, (ar["y"] + ar["height"]) // TILE - 1
+        # cellules = tout le cadre sauf les tuiles atteignables de l'extérieur sans la porte (les murs, jamais foulés, comptent :
+        # ça donne des rectangles bien plus gros)
+        cells = {(x, y) for y in range(by0, by1 + 1) for x in range(bx0, bx1 + 1) if not outside[y * W + x]}
+        cells |= {(x, y) for x in range(dx0, dx1 + 1) for y in range(dy0, it.get("door_inside_to", dy1) + 1)}
+        cells -= {(x, y) for (x, y) in cells if outside[y * W + x]}
+        rects = []; left = set(cells)
+        while left:
+            x0, y0 = min(left, key=lambda c: (c[1], c[0])); x1 = x0
+            while (x1 + 1, y0) in left: x1 += 1
+            y1 = y0
+            while all((x, y1 + 1) in left for x in range(x0, x1 + 1)): y1 += 1
+            rects.append((x0, y0, x1, y1)); left -= {(x, y) for x in range(x0, x1 + 1) for y in range(y0, y1 + 1)}
+        for i, (x0, y0, x1, y1) in enumerate(rects):
+            expanded.append({"name": ar["name"] + ("" if i == 0 else f"_{i + 1}"), "x": x0 * TILE, "y": y0 * TILE, "width": (x1 - x0 + 1) * TILE, "height": (y1 - y0 + 1) * TILE})
+        print("aires intérieures", ar["name"], ":", len(rects), "rectangles,", len(cells), "tuiles ->", [r["name"] for r in expanded if r["name"].startswith(ar["name"])])
+    areas = expanded
     for ar in areas:
         if any(o.get("name") == ar["name"] for o in fl["objects"]): continue
         fl["objects"].append({"height": ar["height"], "id": m["nextobjectid"], "name": ar["name"], "rotation": 0,

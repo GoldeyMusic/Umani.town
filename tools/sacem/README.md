@@ -9,9 +9,9 @@ tilesets dans `tilesets/sacem-test/` et son propre script `sacem-test.js`.
 | Fichier | Rôle |
 |---|---|
 | `sacem-test.tmj` | la map de test (générée, ne pas éditer à la main sauf collisions dans Tiled) |
-| `sacem-test.js` | `script.js` + `"sacem"` dans `roofLayers` (le toit s'efface dans l'aire `roof_sacem`) |
+| `sacem-test.js` | `script.js` + gestion du toit SACEM : l'intérieur est couvert par plusieurs aires rectangulaires `roof_sacem`, `roof_sacem_2`… (calculées par `build_map.py` : tuiles atteignables seulement par la porte, murs compris), un compteur masque `roofs/sacem` tant qu'on est dans l'une d'elles. Si le nombre d'aires change à la régénération (ligne « aires intérieures » du build), mettre à jour la liste `sacemAreas` du script. |
 | `tilesets/sacem-test/*.png` | les 7 peintures étendues (108×93 tuiles) + godray étendu |
-| `paint-sacem/` | entrées du builder : `water.json` (eau animée), `collisions.png` (zone d'extension), `clears.json` (tuiles vidées dans le campus : arbre, foyers), `areas.json` (aire `roof_sacem`), `ring.json` / `props.json` (rochers et décor clonés, positions en tuiles) |
+| `paint-sacem/` | entrées du builder : `water.json` (eau animée), `collisions.png` (zone d'extension), `clears.json` (tuiles vidées dans le campus : arbre, foyers), `areas.json` (aire `roof_sacem` avec sa description « interior » : graine, point extérieur, couloir de la porte), `ring.json` / `props.json` (rochers et décor clonés, positions en tuiles) |
 | `tools/build_map.py` | génère un .tmj à partir de `map.tmj` + peintures étendues (gère l'extension en largeur) |
 | `tools/sacem/build_ext.py` | construit les peintures étendues (herbe/sable/mer/rochers/décor clonés du campus, chemin, bâtiment) |
 | `tools/sacem/assets/ps_base.png`, `ps_toit.png` | calques Photoshop de David (hall vide = base, toit avec l'auvent de l'entrée) à l'échelle map (0,72, décalage 21 px pour caler la porte sur une tuile) |
@@ -24,7 +24,7 @@ python3 tools/sacem/build_ext.py
 python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)" --keep-collisions sacem-test.tmj
 ```
 
-`--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées. Dans les deux cas, les tuiles de `paint-sacem/walls-side.json` (murs latéraux du bâtiment, calculées par `build_ext.py`) sont toujours bloquées : on ne peut pas être derrière un mur qui est à côté de soi, donc on ne le traverse pas ; le couloir de la porte (3 tuiles) est exempté.
+`--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées. Dans les deux cas, les tuiles de `paint-sacem/walls-side.json` (murs latéraux et pied des murs du fond / bibliothèques, calculées par `build_ext.py` : toute tuile contenant ≥ 25 % de ces pixels) sont toujours bloquées : on ne peut pas être derrière un mur qui est à côté de soi, donc on ne le traverse pas ; le couloir de la porte (3 tuiles) est exempté. Restent franchissables et masquants : la bande du mur avant et la face intérieure du mur du fond (accès par l'extérieur).
 
 Dépendances Python : Pillow, numpy, scipy.
 
