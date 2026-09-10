@@ -18,19 +18,19 @@ os.makedirs(OUT, exist_ok=True)
 
 # (fichier source, nom affiché, direction, tags, collision, depth)
 #   collision : "base" = ligne de base par colonne ; "socle" = bande au-dessus du point le plus bas ; "none" = franchissable
-#   depth : "sol" (sous les wokas), "base" (tri sur le bas de l'image), "ligne" (tri sur la ligne moyenne de la base, cloisons en diagonale)
+#   depth : "sol" (sous les wokas), "assise" (le woka qui s'y tient passe devant : sièges, table basse), "base" (tri sur le bas de l'image), "ligne" (tri sur la ligne moyenne de la base, cloisons en diagonale)
 OBJ = [
     ("0000_open-space", "Cloison vitrée", "Down", ["sacem", "cloison", "vitre"], "base", "ligne"),
-    ("0001_table", "Table basse", "Down", ["sacem", "table"], "none", "base"),
+    ("0001_table", "Table basse", "Down", ["sacem", "table"], "none", "assise"),
     ("0002_point-info", "Point info (accueil)", "Down", ["sacem", "accueil", "comptoir"], "base", "base"),
     ("0003_tapis", "Tapis rond", "Down", ["sacem", "tapis"], "none", "sol"),
     ("0004_bureau", "Bureau", "Down", ["sacem", "bureau"], "base", "base"),
-    ("0005_canapé", "Canapé", "Right", ["sacem", "canapé", "salon"], "none", "base"),
-    ("0008_fauteuil-3", "Fauteuil", "Down", ["sacem", "fauteuil", "salon"], "none", "base"),
-    ("0006_fauteuil-5", "Fauteuil", "Right", ["sacem", "fauteuil", "salon"], "none", "base"),
-    ("0007_fauteuil-4", "Fauteuil", "Left", ["sacem", "fauteuil", "salon"], "none", "base"),
-    ("0009_fauteuil-2", "Fauteuil (bis)", "Down", ["sacem", "fauteuil", "salon"], "none", "base"),
-    ("0010_fauteuil-1", "Fauteuil (bis)", "Left", ["sacem", "fauteuil", "salon"], "none", "base"),
+    ("0005_canapé", "Canapé", "Right", ["sacem", "canapé", "salon"], "none", "assise"),
+    ("0008_fauteuil-3", "Fauteuil", "Down", ["sacem", "fauteuil", "salon"], "none", "assise"),
+    ("0006_fauteuil-5", "Fauteuil", "Right", ["sacem", "fauteuil", "salon"], "none", "assise"),
+    ("0007_fauteuil-4", "Fauteuil", "Left", ["sacem", "fauteuil", "salon"], "none", "assise"),
+    ("0009_fauteuil-2", "Fauteuil (bis)", "Down", ["sacem", "fauteuil", "salon"], "none", "assise"),
+    ("0010_fauteuil-1", "Fauteuil (bis)", "Left", ["sacem", "fauteuil", "salon"], "none", "assise"),
     ("0017_plante-1", "Plante 1", "Down", ["sacem", "plante"], "socle", "base"),
     ("0016_plante-2", "Plante 2", "Down", ["sacem", "plante"], "socle", "base"),
     ("0015_plante-3", "Plante 3", "Down", ["sacem", "plante"], "socle", "base"),
@@ -84,6 +84,7 @@ for src, name, direction, tags, collision, depth in OBJ:
         if grid is None: break
     n, ox, canvas, A, grid = best
     if depth == "sol": dz = -(ch + 32)
+    elif depth == "assise": dz = -ch                     # tri sur le haut du canevas : un woka dont les pieds sont dans le siège est dessiné dessus
     elif depth == "ligne":
         yb = [np.where(A[:, x])[0].max() for x in range(cw) if A[:, x].any()]
         dz = -int(round(ch - float(np.mean(yb))))

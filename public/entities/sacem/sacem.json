@@ -75,7 +75,8 @@
    ],
    "imagePath": "table-basse-down.png",
    "direction": "Down",
-   "color": "brown"
+   "color": "brown",
+   "depthOffset": -64
   },
   {
    "name": "Point info (accueil)",
@@ -152,7 +153,8 @@
    ],
    "imagePath": "canape-right.png",
    "direction": "Right",
-   "color": "brown"
+   "color": "brown",
+   "depthOffset": -64
   },
   {
    "name": "Fauteuil",
@@ -163,7 +165,8 @@
    ],
    "imagePath": "fauteuil-down.png",
    "direction": "Down",
-   "color": "brown"
+   "color": "brown",
+   "depthOffset": -64
   },
   {
    "name": "Fauteuil",
@@ -174,7 +177,8 @@
    ],
    "imagePath": "fauteuil-right.png",
    "direction": "Right",
-   "color": "brown"
+   "color": "brown",
+   "depthOffset": -64
   },
   {
    "name": "Fauteuil",
@@ -185,7 +189,8 @@
    ],
    "imagePath": "fauteuil-left.png",
    "direction": "Left",
-   "color": "brown"
+   "color": "brown",
+   "depthOffset": -64
   },
   {
    "name": "Fauteuil (bis)",
@@ -196,7 +201,8 @@
    ],
    "imagePath": "fauteuil-bis-down.png",
    "direction": "Down",
-   "color": "sienna"
+   "color": "sienna",
+   "depthOffset": -64
   },
   {
    "name": "Fauteuil (bis)",
@@ -207,7 +213,8 @@
    ],
    "imagePath": "fauteuil-bis-left.png",
    "direction": "Left",
-   "color": "sienna"
+   "color": "sienna",
+   "depthOffset": -64
   },
   {
    "name": "Plante 1",
