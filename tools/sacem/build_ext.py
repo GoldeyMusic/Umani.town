@@ -348,6 +348,10 @@ hall_seed = (int(730 * S_) + OFF[1], int(780 * S_) + OFF[0])                    
 lab, n = ndi.label(ndi.binary_closing(floorc, iterations=2)); hall_px = lab == lab[hall_seed]
 apron_seed = (int(1300 * S_) + OFF[1], int(704 * S_) + OFF[0])                                # paillasson / parvis
 lab, n = ndi.label(opaque & ~wall); apron_px = ((lab == lab[apron_seed]) if lab[apron_seed] else np.zeros_like(hall_px)) & ~hall_px
+# le parvis ne dépasse pas l'auvent (y >= 1000 source) ni +/- 130 px autour de l'axe de la porte (sinon, sans auvent
+# dans la base, la composante remonte le long des faces intérieures des murs)
+yy_g, xx_g = np.mgrid[0:Ht * T, 0:Wt * T]
+apron_px &= (yy_g >= int(1000 * S_) + OFF[1]) & (np.abs(xx_g - (704 * S_ + OFF[0])) <= 130)
 # Présentoir (tableau SACEM) : franchissable (demande de David) -> compté comme sol ; la face du mur derrière reste bloquée
 pb = (slice(int(630 * S_) + OFF[1], int(785 * S_) + OFF[1]), slice(int(415 * S_) + OFF[0], int(510 * S_) + OFF[0]))
 wallface = (np.abs(g_ / rf_ - 0.887) < 0.04) & (b_ / rf_ > 0.76) & (b_ / rf_ < 0.83)

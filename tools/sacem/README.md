@@ -14,7 +14,8 @@ tilesets dans `tilesets/sacem-test/` et son propre script `sacem-test.js`.
 | `paint-sacem/` | entrées du builder : `water.json` (eau animée), `collisions.png` (zone d'extension), `clears.json` (tuiles vidées dans le campus : arbre, foyers), `areas.json` (aire `roof_sacem`), `ring.json` / `props.json` (rochers et décor clonés, positions en tuiles) |
 | `tools/build_map.py` | génère un .tmj à partir de `map.tmj` + peintures étendues (gère l'extension en largeur) |
 | `tools/sacem/build_ext.py` | construit les peintures étendues (herbe/sable/mer/rochers/décor clonés du campus, chemin, bâtiment) |
-| `tools/sacem/assets/ps_base.png`, `ps_toit.png` | calques Photoshop de David (hall vide = base, toit) à l'échelle map (0,72, décalage 21 px pour caler la porte sur une tuile) |
+| `tools/sacem/assets/ps_base.png`, `ps_toit.png` | calques Photoshop de David (hall vide = base, toit avec l'auvent de l'entrée) à l'échelle map (0,72, décalage 21 px pour caler la porte sur une tuile) |
+| `public/entities/sacem/` | collection d'entités SACEM pour l'éditeur de map (mobilier détouré par David, réduit à 0,72, canevas multiples de 32) : `sacem.json` + un PNG par objet/orientation. Servie par GitHub Pages : `https://goldeymusic.github.io/Umani.town/entities/sacem/sacem.json` ; à déclarer dans le `.wam` de la room (`entityCollections`) |
 
 ## Régénérer
 
@@ -40,7 +41,16 @@ peintures étendues (ou garder le dossier `tilesets/sacem-test/` comme tilesets 
 ## Ajuster
 
 - Collisions du bâtiment : ouvrir `sacem-test.tmj` dans Tiled, calque `collisions` (tuile « collides »).
-  Le bâtiment a 336 tuiles bloquées : tout ce qui n'est pas le sol du hall (murs et leurs faces intérieures, bibliothèques, plantes de l'entrée ; le présentoir est franchissable) ; l'open space, l'entrée et le parvis sont libres ; seule l'emprise de la base bloque derrière, on passe juste derrière le mur (caché par le toit).
+  Le bâtiment a 347 tuiles bloquées : tout ce qui n'est pas le sol du hall (murs et leurs faces intérieures, bibliothèques, plantes de l'entrée ; le présentoir est franchissable) ; l'open space, l'entrée et le parvis sont libres ; seule l'emprise de la base bloque derrière, on passe juste derrière le mur (caché par le toit).
 - Décor : `paint-sacem/props.json` = liste `[objet, colonne, ligne]` (objets : `arbre`, `arbre2`, `palmA`,
   `palmC`, `palmD`, `palmE`, `buisson`, `fleur`, `palmbush`, `rocher`), puis régénérer.
 - Position du bâtiment : `PX, PY` dans `build_ext.py` (actuellement colonne 68, ligne 31 ; porte colonne 84, bas du parvis ligne 62,8). Échelle `S_`/`OFF` (0,72 / 21 px) : à changer avec les calques `assets/`.
+
+## Mobilier (collection d'entités)
+
+Générée par `sacem/entites/build_entities.py` (scratch Claude) à partir des détourages de David (`Objets séparés`, échelle master 1500 px).
+Règles : réduction 0,72 (LANCZOS), objet calé en bas de son canevas, position horizontale choisie pour bloquer le moins de tuiles ;
+collision = bande de base (20 px au-dessus des pieds), uniquement pour cloison, accueil, bureau, plantes, machine à café ;
+canapé, fauteuils, table basse et tapis sont franchissables ; le tapis est sous les wokas (`depthOffset` négatif).
+Déclaration dans la room (token map-storage) :
+`curl -X PATCH "https://coolio-town-14561.map-storage.workadventu.re/sacem-test.wam" -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json-patch+json" -d '[{"op":"add","path":"/entityCollections/-","value":{"url":"https://goldeymusic.github.io/Umani.town/entities/sacem/sacem.json","type":"file"}}]'`
