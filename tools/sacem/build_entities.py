@@ -11,7 +11,7 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np, json, os, sys, unicodedata
 S, T = 0.72, 32
 FAM = {"siege": 0.65, "plante": 0.65, "sol": 0.65}      # réduction supplémentaire (David, 10/09 : 65 % pour tout ; le mobilier du PSD est à l'échelle de l'architecture, pas du woka)
-SCALE = {"Point info (accueil)": 0.75, "Tapis rond (grand)": 0.85}   # échelles propres (David, 10/09), à la place de FAM
+SCALE = {"Point info (accueil)": 0.75, "Tapis rond (grand)": 0.85, "Machine à café": 0.85}   # échelles propres (David, 10/09), à la place de FAM
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/Downloads/Objets séparés")          # exports Photoshop de David (SACEM-Umani_0001s_00NN_<nom>.png)
 OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(HERE, "..", "..", "public", "entities", "sacem")
