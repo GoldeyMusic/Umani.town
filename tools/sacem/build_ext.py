@@ -390,8 +390,21 @@ yy_b = np.arange(Ht * T)[:, None]                                               
 # Tout le bâtiment passe devant le woka (il ne peut chevaucher que ce que ses collisions l'autorisent à approcher : bande
 # basse des murs avant/latéraux, face intérieure du mur du fond depuis l'extérieur), SAUF la bande de 40 px des éléments
 # posés juste au-dessus du sol (pied du mur du fond, bas des bibliothèques) : là, un woka sur le sol est devant eux.
-near_floor_below = (iy_ > yy_b) & (dist <= 40)
-front = opaque & ~ground & (dist < 400) & ~near_floor_below
+# Classement par direction du sol le plus proche : au-dessus => mur avant (devant) ; à côté => mur latéral (derrière,
+# le woka qui le longe est devant) ; au-dessous => mur du fond : derrière si à moins de 40 px du sol (pied du mur,
+# bibliothèques), devant au-delà (face intérieure vue depuis l'extérieur). Puis décision à la tuile (classe majoritaire
+# des pixels de mur de la tuile) pour éviter les demi-masquages à l'intérieur d'une même case.
+xx_b = np.arange(Wt * T)[None, :]
+dy_ = iy_ - yy_b; dx_ = np.abs(ix_ - xx_b)
+cand = opaque & ~ground & (dist < 400)
+f_px = cand & (((dy_ < 0) & (-dy_ >= dx_)) | ((dy_ > 0) & (dy_ >= dx_) & (dist > 40)))
+b_px = cand & ~f_px
+front = np.zeros_like(cand)
+for ty_ in range(Ht):
+    for tx_ in range(Wt):
+        sl = (slice(ty_ * T, (ty_ + 1) * T), slice(tx_ * T, (tx_ + 1) * T))
+        nf, nb = int(f_px[sl].sum()), int(b_px[sl].sum())
+        if nf + nb and nf >= nb: front[sl] = cand[sl]
 front = ndi.binary_opening(front, iterations=1)                         # sans miettes isolées
 fb = base.copy(); fb[~front] = 0                                        # pixels « devant »
 wb = base.copy(); wb[front] = 0                                         # pixels « derrière » + sol
