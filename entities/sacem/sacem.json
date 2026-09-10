@@ -1,0 +1,466 @@
+{
+ "collectionName": "SACEM",
+ "tags": [
+  "sacem"
+ ],
+ "collection": [
+  {
+   "name": "Cloison vitrée",
+   "tags": [
+    "sacem",
+    "cloison",
+    "vitre"
+   ],
+   "imagePath": "cloison-vitree-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     1,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     1,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     1,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     1,
+     0,
+     0,
+     0
+    ]
+   ],
+   "depthOffset": -109
+  },
+  {
+   "name": "Table basse",
+   "tags": [
+    "sacem",
+    "table"
+   ],
+   "imagePath": "table-basse-down.png",
+   "direction": "Down",
+   "color": "brown"
+  },
+  {
+   "name": "Point info (accueil)",
+   "tags": [
+    "sacem",
+    "accueil",
+    "comptoir"
+   ],
+   "imagePath": "point-info-accueil-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     1,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     1,
+     1,
+     1,
+     0
+    ]
+   ]
+  },
+  {
+   "name": "Tapis rond",
+   "tags": [
+    "sacem",
+    "tapis"
+   ],
+   "imagePath": "tapis-rond-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "depthOffset": -224
+  },
+  {
+   "name": "Bureau",
+   "tags": [
+    "sacem",
+    "bureau"
+   ],
+   "imagePath": "bureau-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     0,
+     0,
+     0,
+     0
+    ],
+    [
+     1,
+     0,
+     1,
+     1
+    ],
+    [
+     0,
+     1,
+     1,
+     1
+    ]
+   ]
+  },
+  {
+   "name": "Canapé",
+   "tags": [
+    "sacem",
+    "canapé",
+    "salon"
+   ],
+   "imagePath": "canape-right.png",
+   "direction": "Right",
+   "color": "brown"
+  },
+  {
+   "name": "Fauteuil",
+   "tags": [
+    "sacem",
+    "fauteuil",
+    "salon"
+   ],
+   "imagePath": "fauteuil-down.png",
+   "direction": "Down",
+   "color": "brown"
+  },
+  {
+   "name": "Fauteuil",
+   "tags": [
+    "sacem",
+    "fauteuil",
+    "salon"
+   ],
+   "imagePath": "fauteuil-right.png",
+   "direction": "Right",
+   "color": "brown"
+  },
+  {
+   "name": "Fauteuil",
+   "tags": [
+    "sacem",
+    "fauteuil",
+    "salon"
+   ],
+   "imagePath": "fauteuil-left.png",
+   "direction": "Left",
+   "color": "brown"
+  },
+  {
+   "name": "Fauteuil (bis)",
+   "tags": [
+    "sacem",
+    "fauteuil",
+    "salon"
+   ],
+   "imagePath": "fauteuil-bis-down.png",
+   "direction": "Down",
+   "color": "sienna"
+  },
+  {
+   "name": "Fauteuil (bis)",
+   "tags": [
+    "sacem",
+    "fauteuil",
+    "salon"
+   ],
+   "imagePath": "fauteuil-bis-left.png",
+   "direction": "Left",
+   "color": "sienna"
+  },
+  {
+   "name": "Plante 1",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-1-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  {
+   "name": "Plante 2",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-2-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  {
+   "name": "Plante 3",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-3-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     1
+    ]
+   ]
+  },
+  {
+   "name": "Plante 4",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-4-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0
+    ],
+    [
+     0
+    ],
+    [
+     1
+    ]
+   ]
+  },
+  {
+   "name": "Plante 5",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-5-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  {
+   "name": "Plante 6",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-6-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0
+    ],
+    [
+     1
+    ]
+   ]
+  },
+  {
+   "name": "Plante 7",
+   "tags": [
+    "sacem",
+    "plante"
+   ],
+   "imagePath": "plante-7-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0,
+     0
+    ],
+    [
+     0,
+     0
+    ],
+    [
+     1,
+     0
+    ]
+   ]
+  },
+  {
+   "name": "Machine à café",
+   "tags": [
+    "sacem",
+    "machine",
+    "café"
+   ],
+   "imagePath": "machine-a-cafe-down.png",
+   "direction": "Down",
+   "color": "brown",
+   "collisionGrid": [
+    [
+     0
+    ],
+    [
+     0
+    ],
+    [
+     1
+    ]
+   ]
+  }
+ ]
+}
