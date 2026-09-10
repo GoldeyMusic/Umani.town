@@ -48,8 +48,9 @@ peintures étendues (ou garder le dossier `tilesets/sacem-test/` comme tilesets 
 
 ## Mobilier (collection d'entités)
 
-Générée par `sacem/entites/build_entities.py` (scratch Claude) à partir des détourages de David (`Objets séparés`, échelle master 1500 px).
-Règles : réduction 0,72 (LANCZOS), objet calé en bas de son canevas, position horizontale choisie pour bloquer le moins de tuiles ;
+Générée par `tools/sacem/build_entities.py` à partir des détourages de David (`~/Downloads/Objets séparés`, échelle master 1500 px) :
+`python3 tools/sacem/build_entities.py` (options : dossier des exports, dossier de sortie, planche de contrôle).
+Règles : réduction 0,72 × 0,65 = 0,47 (LANCZOS ; le mobilier du PSD est à l'échelle de l'architecture, 65 % validé par David face aux wokas), objet calé en bas de son canevas, position horizontale choisie pour bloquer le moins de tuiles ;
 collision = bande de base (20 px au-dessus des pieds), uniquement pour cloison, accueil, bureau, plantes, machine à café ;
 canapé, fauteuils, table basse et tapis sont franchissables ; le tapis est sous les wokas (`depthOffset` négatif).
 Déclaration dans la room (token map-storage) :
