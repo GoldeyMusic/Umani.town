@@ -24,6 +24,8 @@ python3 tools/sacem/build_ext.py
 python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)" --keep-collisions sacem-test.tmj
 ```
 
+Peintures retouchées à la main dans Photoshop : leur nom de fichier est listé dans `tilesets/sacem-test/KEEP.txt` (une ligne par fichier ; actuellement `coolio_floor.png`, sol repeint par David le 28/09) et `build_ext.py` ne les réécrit jamais. Règles de retouche : même taille de document (3456 × 2976), même position, PNG 8 bits avec transparence, même nom ; chaque pixel est affiché 1:1 (sauf sous les tuiles d'eau animée, qui passent par-dessus le sol).
+
 `--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées. Dans les deux cas, les tuiles de `paint-sacem/walls-side.json` (murs latéraux et pied des murs du fond / bibliothèques, calculées par `build_ext.py` : toute tuile contenant ≥ 25 % de ces pixels) sont toujours bloquées : on ne peut pas être derrière un mur qui est à côté de soi, donc on ne le traverse pas ; le couloir de la porte (3 tuiles) est exempté. Restent franchissables et masquants : la bande du mur avant et la face intérieure du mur du fond (accès par l'extérieur).
 
 Dépendances Python : Pillow, numpy, scipy.

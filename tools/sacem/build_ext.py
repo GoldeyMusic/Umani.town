@@ -481,9 +481,15 @@ g2[:, GW:] = vals
 # 11. Sorties
 # =====================================================================================
 os.makedirs(OUT_TS, exist_ok=True); os.makedirs(PAINT, exist_ok=True)
-for n in PAINTINGS: save_rgba(C[n], os.path.join(OUT_TS, f"coolio_{n}.png"))
-save_rgba(C["shadow"], os.path.join(OUT_TS, "general shadow.png"))
-save_rgba(g2, os.path.join(OUT_TS, "God ray linear 45 tall.png"))
+# peintures retouchées à la main (Photoshop) : listées dans tilesets/sacem-test/KEEP.txt, un nom de fichier par ligne -> jamais réécrites
+keep_f = os.path.join(OUT_TS, "KEEP.txt")
+KEEP = {l.strip() for l in open(keep_f) if l.strip() and not l.startswith("#")} if os.path.exists(keep_f) else set()
+def save_painting(a, fname):
+    if fname in KEEP and os.path.exists(os.path.join(OUT_TS, fname)): print("conservé (retouche manuelle) :", fname); return
+    save_rgba(a, os.path.join(OUT_TS, fname))
+for n in PAINTINGS: save_painting(C[n], f"coolio_{n}.png")
+save_painting(C["shadow"], "general shadow.png")
+save_painting(g2, "God ray linear 45 tall.png")
 coll_img = np.zeros((H * T, NEW_W * T, 4), np.uint8); coll_img[coll_px > 0] = (255, 0, 0, 255)
 save_rgba(coll_img, os.path.join(PAINT, "collisions.png"))
 json.dump(wj, open(os.path.join(PAINT, "water.json"), "w"))
