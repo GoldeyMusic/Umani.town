@@ -1,1 +1,7 @@
 coolio_floor.png
+general shadow.png
+coolio_walls.png
+coolio_furniture.png
+coolio_outer plant.png
+coolio_above.png
+coolio_roof.png

@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
+    "prebuild": "node tools/refresh-coverage.mjs",
     "build": "tsc && vite build",
     "prod": "vite preview",
     "upload": "npm run build && upload-wa-map",
@@ -16,6 +17,7 @@
     "@workadventure/iframe-api-typings": "^1.20.00",
     "@workadventure/upload-maps": "^1.6.4",
     "dotenv": "^16.3.1",
+    "sharp": "^0.30.4",
     "typescript": "^4.9.5",
     "vite": "^4.5.3",
     "wa-map-optimizer-vite": "^1.1.29"

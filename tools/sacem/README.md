@@ -13,6 +13,7 @@ tilesets dans `tilesets/sacem-test/` et son propre script `sacem-test.js`.
 | `tilesets/sacem-test/*.png` | les 7 peintures étendues (108×93 tuiles) + godray étendu |
 | `paint-sacem/` | entrées du builder : `water.json` (eau animée), `collisions.png` (zone d'extension), `clears.json` (tuiles vidées dans le campus : arbre, foyers), `areas.json` (aire `roof_sacem` avec sa description « interior » : graine, point extérieur, couloir de la porte), `ring.json` / `props.json` (rochers et décor clonés, positions en tuiles) |
 | `tools/build_map.py` | génère un .tmj à partir de `map.tmj` + peintures étendues (gère l'extension en largeur) |
+| `tools/refresh-coverage.mjs` | `prebuild` : remet les calques de tuiles en phase avec les peintures (même règle que `--paint-coverage`) |
 | `tools/sacem/build_ext.py` | construit les peintures étendues (herbe/sable/mer/rochers/décor clonés du campus, chemin, bâtiment) |
 | `tools/sacem/assets/ps_base.png`, `ps_toit.png` | calques Photoshop de David (hall vide = base, toit avec l'auvent de l'entrée) à l'échelle map (0,72, décalage 21 px pour caler la porte sur une tuile) |
 | `public/entities/sacem/` | collection d'entités SACEM pour l'éditeur de map (mobilier détouré par David, réduit à 0,72, canevas multiples de 32) : `sacem.json` + un PNG par objet/orientation. Servie par GitHub Pages : `https://goldeymusic.github.io/Umani.town/entities/sacem/sacem.json` ; à déclarer dans le `.wam` de la room (`entityCollections`) |
@@ -21,10 +22,14 @@ tilesets dans `tilesets/sacem-test/` et son propre script `sacem-test.js`.
 
 ```
 python3 tools/sacem/build_ext.py
-python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)" --keep-collisions sacem-test.tmj
+python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem --out sacem-test.tmj --script sacem-test.js --name "UMANI Town (test SACEM)" --keep-collisions sacem-test.tmj --paint-coverage
 ```
 
-Peintures retouchées à la main dans Photoshop : leur nom de fichier est listé dans `tilesets/sacem-test/KEEP.txt` (une ligne par fichier ; actuellement `coolio_floor.png`, sol repeint par David le 28/09) et `build_ext.py` ne les réécrit jamais. Règles de retouche : même taille de document (3456 × 2976), même position, PNG 8 bits avec transparence, même nom ; chaque pixel est affiché 1:1 (sauf sous les tuiles d'eau animée, qui passent par-dessus le sol).
+## Peintures retouchées dans Photoshop (depuis le 28/09)
+
+Les 7 peintures de `tilesets/sacem-test/` (`coolio_floor`, `general shadow`, `coolio_walls`, `coolio_furniture`, `coolio_outer plant`, `coolio_above`, `coolio_roof`, empilées dans cet ordre, le woka entre `outer plant` et `above`) sont la source de la map : David les retouche dans Photoshop, `build_ext.py` ne les réécrit plus (liste `tilesets/sacem-test/KEEP.txt`). Règles : même taille de document (3456 × 2976), même position, PNG 8 bits avec transparence, même nom, un fichier par calque ; chaque pixel est affiché 1:1 (sous l'eau animée, les tuiles d'eau passent par-dessus le sol). Le god ray (3520 × 4000, fenêtre décalée de 32 px, opacité 43 %) et l'eau (tuiles animées) ne sont pas des peintures retouchables.
+
+La peinture fait foi (`--paint-coverage`) : une tuile de calque existe là où sa peinture a des pixels, et seulement là (donc pas de tuiles vides en plus pour l'optimiseur : 144 chunks). Le script `tools/refresh-coverage.mjs`, lancé automatiquement avant chaque build (`prebuild`, y compris dans l'action GitHub), applique la même règle au `sacem-test.tmj` : un élément ajouté dans une zone vide apparaît au push suivant, sans régénération. Toits de l'extension : pixels dans le rectangle `paint-sacem/roof-rect.json` (tuiles x 68–102, y 31–65, le canevas du bâtiment) → `roofs/sacem` (effacé par la porte), ailleurs → `roofs/ext` (jamais effacé) ; le campus garde ses 4 calques de toits d'origine. Cas particuliers conservés tels quels : la statue animée dans `above` (4 tuiles) et les 20 tuiles de `furniture/above`.
 
 `--keep-collisions sacem-test.tmj` reprend le calque `collisions` du fichier existant (retouches faites dans Tiled par David le 10/09) au lieu de le recalculer ; l'omettre pour revenir aux collisions calculées. Dans les deux cas, les tuiles de `paint-sacem/walls-side.json` (murs latéraux et pied des murs du fond / bibliothèques, calculées par `build_ext.py` : toute tuile contenant ≥ 25 % de ces pixels) sont toujours bloquées : on ne peut pas être derrière un mur qui est à côté de soi, donc on ne le traverse pas ; le couloir de la porte (3 tuiles) est exempté. Restent franchissables et masquants : la bande du mur avant et la face intérieure du mur du fond (accès par l'extérieur).
 

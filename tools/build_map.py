@@ -12,6 +12,7 @@ autres tilesets, collisions, eau animée, aires, script.
 Usage :
     python3 tools/build_map.py --src map.tmj --paintings tilesets/sacem-test --paint paint-sacem \
                                --out sacem-test.tmj --script sacem-test.js [--name "UMANI Town (test SACEM)"]
+                               [--keep-collisions sacem-test.tmj] [--paint-coverage]
 
 Dossier --paintings : coolio_floor.png, coolio_walls.png, coolio_furniture.png, coolio_outer plant.png,
     coolio_above.png, coolio_roof.png, general shadow.png, et optionnellement God ray linear 45 tall.png
@@ -20,6 +21,7 @@ Dossier --paint (entrées optionnelles) :
     water.json       {"tileset": ..., "tiles": {"x,y": id_local}} tuiles d'eau (posées partout où listées)
     clears.json      {"collisions": [[x,y],...], "layers": {"nom calque": [[x,y],...]}} tuiles à vider (zone campus)
     areas.json       [{"name": "roof_sacem", "x":..,"y":..,"width":..,"height":..}] aires à ajouter (px)
+    roof-rect.json   [x0, y0, x1, y1] en tuiles : rectangle du toit SACEM (--paint-coverage)
 La zone campus (ancienne taille) garde ses données d'origine ; les tuiles identité dont la peinture
 est devenue transparente sont vidées. La zone d'extension est régénérée depuis les peintures.
 """
@@ -52,6 +54,9 @@ def main():
     ap.add_argument("--script", default=None); ap.add_argument("--name", default=None)
     ap.add_argument("--keep-collisions", default=None, metavar="TMJ",
                     help="reprend tel quel le calque collisions de ce .tmj (retouches faites dans Tiled) au lieu de le recalculer")
+    ap.add_argument("--paint-coverage", action="store_true",
+                    help="la peinture fait foi partout (campus compris) : une tuile de calque existe si sa peinture a des pixels, sinon elle est vide ; "
+                         "toits de l'extension répartis entre roofs/sacem (rectangle paint/roof-rect.json) et roofs/ext")
     a = ap.parse_args()
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); os.chdir(root)
     m = json.load(open(a.src, encoding="utf-8"))
@@ -128,6 +133,10 @@ def main():
     alphas = {name: im.split()[3] for name, im in imgs.items()}
     def has_pixels(name, x, y):
         return alphas[name].crop((x * TILE, y * TILE, (x + 1) * TILE, (y + 1) * TILE)).getbbox() is not None
+    def tile_bytes(name, i):
+        x, y = i % W, i // W
+        return imgs[name].crop((x * TILE, y * TILE, (x + 1) * TILE, (y + 1) * TILE)).tobytes()
+    def same_tile(name, i, j): return tile_bytes(name, i) == tile_bytes(name, j)
 
     paint_layers = {ln: name for name, lns in PAINTINGS.items() for ln in lns}
     for l in walk(m["layers"]):
@@ -139,7 +148,12 @@ def main():
             name = paint_layers[l["name"]]; first = new_first[name]
             for i in range(W * H):
                 x, y = i % W, i // W
-                if in_ext(x, y): data[i] = first + i if has_pixels(name, x, y) else 0
+                if a.paint_coverage:                                                 # la peinture fait foi, partout : identité si la tuile a des pixels, vide sinon
+                    if not data[i] or (data[i] & ~FLIP_MASK) == first + i: data[i] = first + i if has_pixels(name, x, y) else 0
+                    elif not (data[i] & FLIP_MASK) and 0 <= data[i] - first < W * H and same_tile(name, data[i] - first, i):
+                        data[i] = first + i if has_pixels(name, x, y) else 0         # copie d'une autre tuile de la même peinture, déjà cuite à cette position
+                    # sinon : tuile d'un autre tileset (statue animée) ou retournée -> conservée
+                elif in_ext(x, y): data[i] = first + i if has_pixels(name, x, y) else 0
                 elif data[i]:
                     loc = (data[i] & ~FLIP_MASK) - first
                     if 0 <= loc < W * H and not has_pixels(name, loc % W, loc // W):
@@ -183,8 +197,29 @@ def main():
                  "type": "tilelayer", "visible": True, "width": W, "x": 0, "y": 0}
         m["nextlayerid"] += 1; roofs_group["layers"].append(sacem)
     first = new_first["coolio_roof"]
-    sacem["data"] = [first + i if in_ext(i % W, i // W) and has_pixels("coolio_roof", i % W, i // W) else 0 for i in range(W * H)]
-    print("toit sacem :", sum(1 for g in sacem["data"] if g), "tuiles")
+    roof_px = [i for i in range(W * H) if in_ext(i % W, i // W) and has_pixels("coolio_roof", i % W, i // W)]
+    if a.paint_coverage:
+        # pixels de toit de l'extension : dans le rectangle SACEM (paint/roof-rect.json, tuiles [x0, y0, x1, y1] inclus) -> roofs/sacem
+        # (effacé par la porte) ; ailleurs -> roofs/ext (jamais effacé). Même règle dans tools/refresh-coverage.mjs (prebuild).
+        rect = load_json("roof-rect.json")
+        if not rect:
+            xs, ys = [i % W for i in roof_px], [i // W for i in roof_px]
+            rect = [max(oldW, min(xs) - 3), max(0, min(ys) - 3), min(W - 1, max(xs) + 3), min(H - 1, max(ys) + 3)]
+            json.dump(rect, open(os.path.join(paint, "roof-rect.json"), "w")); print("rectangle toit SACEM écrit :", rect)
+        rx0, ry0, rx1, ry1 = rect
+        in_rect = lambda x, y: rx0 <= x <= rx1 and ry0 <= y <= ry1
+        rp = set(roof_px)
+        sacem["data"] = [first + i if i in rp and in_rect(i % W, i // W) else 0 for i in range(W * H)]
+        ext = next((l for l in roofs_group["layers"] if l["name"] == "ext"), None)
+        if ext is None:
+            ext = {"data": [], "height": H, "id": m["nextlayerid"], "name": "ext", "opacity": 1,
+                   "type": "tilelayer", "visible": True, "width": W, "x": 0, "y": 0}
+            m["nextlayerid"] += 1; roofs_group["layers"].insert(roofs_group["layers"].index(sacem), ext)
+        ext["data"] = [first + i if i in rp and not in_rect(i % W, i // W) else 0 for i in range(W * H)]
+        print(f"toit sacem : rectangle tuiles {rect} -> {sum(1 for g in sacem['data'] if g)} tuiles ; roofs/ext : {sum(1 for g in ext['data'] if g)} tuiles")
+    else:
+        rp = set(roof_px); sacem["data"] = [first + i if i in rp else 0 for i in range(W * H)]
+        print("toit sacem :", sum(1 for g in sacem["data"] if g), "tuiles")
 
     # aires
     fl = next(l for l in m["layers"] if l["type"] == "objectgroup" and l["name"] == "floorLayer")
